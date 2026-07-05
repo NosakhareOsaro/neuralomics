@@ -1,0 +1,29 @@
+name: Weekly smoke test
+
+# Cheap end-to-end sanity check, independent of the push-triggered CI job.
+# Intent: catch silent breakage from upstream dependency releases even on
+# weeks with no commits. Currently runs the same fast unit-test suite as CI;
+# will be extended to run a tiny real pipeline (e.g. Module 1 on its fixture
+# subset) once one exists, so "smoke test" actually exercises data -> model.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # 06:00 UTC every Monday
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run fast test suite
+        run: pytest -m "not slow"
