@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "NeuralOmics: A representation-learning transfer study across genomics and cell biology"
+authors:
+  - family-names: Osaro
+    given-names: Nosakhare
+version: 0.1.0-dev
+date-released: "2026-07-05"
+repository-code: "TODO: add once a GitHub remote is created"
+license: Apache-2.0
+type: software
+keywords:
+  - genomics
+  - deep learning
+  - graph neural networks
+  - transfer learning
+  - cell painting
+  - single-cell RNA-seq
+  - drug-target interaction
+  - foundation models
+# doi: added once the repository is connected to Zenodo and a DOI is minted for a tagged release.
