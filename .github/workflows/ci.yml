@@ -33,5 +33,8 @@ jobs:
       - name: Type check (mypy)
         run: mypy
 
+      # Excludes `slow` tests (e.g. live S3 downloads): push CI should be
+      # fast and deterministic, not depend on an external bucket being
+      # reachable. Slow tests run via the weekly smoke test instead.
       - name: Test
-        run: pytest
+        run: pytest -m "not slow"
