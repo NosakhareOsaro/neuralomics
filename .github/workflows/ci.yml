@@ -18,11 +18,11 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      # NOTE: only the `dev` extra is installed for now, since only common/
-      # has code. As each module lands, add its extra here (or split into a
-      # matrix) so CI actually exercises that module's dependencies.
+      # NOTE: `cellpainting` added now that Module 1 has code. As each
+      # remaining module lands, add its extra here (or split into a matrix)
+      # so CI actually exercises that module's dependencies.
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,cellpainting]"
 
       - name: Lint (ruff)
         run: ruff check .
