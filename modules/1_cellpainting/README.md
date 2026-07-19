@@ -65,6 +65,13 @@ The base profile (`BR00116991_augmented.csv.gz`) has 5,792 real CellProfiler fea
 
 This is pycytominer's standard "ready for downstream ML" output: per-plate normalized, with redundant/blocklisted CellProfiler features already dropped. Verified directly by downloading and parsing it — not assumed from the filename. Metadata columns (`Metadata_broad_sample`, `Metadata_pert_iname`, `Metadata_InChIKey`, `Metadata_smiles`, `Metadata_gene`, `Metadata_pert_type`, `Metadata_control_type`, ...) match and exceed the compound metadata already in `configs/data.yaml`.
 
+Run the profile-fetching script to actually pull and filter it, same conventions as `download.py` (config-driven, idempotent, `--dry-run` supported):
+
+```bash
+python -m cellpainting.profiles            # fetches + filters to our 14 wells, writes data/raw/cellpainting/profiles/
+python -m cellpainting.profiles --dry-run   # fetches + filters in memory, prints counts, writes nothing
+```
+
 **Why not run CellProfiler locally**: headless CellProfiler needs a bioformats/Java dependency plus wxPython — a heavy, fragile install that fits poorly with the agreed Colab Pro compute target — and would require correctly wiring segmentation (nuclei/cell/cytoplasm) and per-object measurement modules ourselves, substantial infrastructure to re-derive something Broad has already computed and published for this exact plate.
 
 **Why not a custom Python substitute** (e.g. scikit-image intensity/texture/shape stats): it would only approximate a subset of these categories and wouldn't be numerically comparable to the literature-standard JUMP profiles. Since the real thing is a free, already-verified ~1MB download for our wells, a substitute would be strictly worse here — more engineering risk for less rigor, not less cost.
