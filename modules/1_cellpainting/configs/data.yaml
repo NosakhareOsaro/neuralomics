@@ -1,0 +1,22 @@
+# Validation-pass data subset for Module 1.
+#
+# Deliberately small: one plate, 10-15 compounds, to prove out the
+# download -> CellProfiler-feature -> model pipeline before scaling up.
+# See docs/build-log.md for the reasoning and DATA_SOURCES.md for provenance.
+
+source:
+  bucket: cellpainting-gallery
+  # Exact batch/plate not yet chosen. Fill in once selected, and mirror the
+  # same values into modules/1_cellpainting/README.md and DATA_SOURCES.md.
+  batch: null
+  plate: null
+
+compounds:
+  # 10-15 compound IDs for the validation subset. Populate once chosen.
+  n_target_min: 10
+  n_target_max: 15
+  ids: []
+
+output:
+  raw_dir: data/raw/cellpainting
+  profiles_dir: data/processed/cellpainting
