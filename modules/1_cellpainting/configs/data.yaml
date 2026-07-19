@@ -123,3 +123,20 @@ compounds:
 output:
   raw_dir: data/raw/cellpainting
   manifest_path: data/raw/cellpainting/manifest.json
+
+# Feature extraction: we do NOT run CellProfiler locally. Broad already
+# published real, per-well CellProfiler profiles for this exact plate,
+# computed via their own pipeline (workspace/pipelines/2020_11_04_CPJUMP1/
+# CPJUMP1_analysis_without_batchfile.cppipe, kept there for provenance only).
+# Verified on 2026-07-20 by downloading and parsing this file directly: 838
+# features, 13 metadata columns, 384 rows (all wells), all 14 of our wells
+# present. See modules/1_cellpainting/README.md's Feature extraction section
+# for why this was chosen over running CellProfiler ourselves or writing a
+# custom substitute. Used only for the tabular baseline / UMAP-SHAP track,
+# not the CNN (which trains on raw images via download.py above).
+profiles:
+  bucket: cellpainting-gallery
+  key: cpg0000-jump-pilot/source_4/workspace/profiles/2020_11_04_CPJUMP1/BR00116991/BR00116991_normalized_feature_select_batch.csv.gz
+  n_features: 838
+  n_metadata_cols: 13
+  n_rows: 384
