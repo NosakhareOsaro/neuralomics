@@ -32,13 +32,26 @@ python -m cellpainting.download            # downloads images + illum files to d
 python -m cellpainting.download --dry-run   # lists file counts/sizes without downloading anything
 ```
 
-This plate acquired 8 channels per site, not the "standard" 5-channel Cell Painting stain set — a consequence of this batch's WGA-stain variant (see the CPJUMP1 experiment metadata). The channel-index → stain-name mapping is not assumed anywhere in this codebase; it is read from this plate's own `Images/Index.idx.xml` before feature extraction, since channel order is an acquisition detail rather than a fixed convention across plates.
+This plate acquired 8 channels per site: the standard 5 fluorescent Cell Painting stains plus 3 non-fluorescent brightfield/z-stack channels that this CPJUMP1 batch collected in addition (not, as an earlier version of this doc guessed, something specific to the plate's "WGA" anomaly flag — that flag turned out to refer to dye-amount differences, not a channel-schema change; see `docs/build-log.md`). The channel-index → stain mapping was confirmed, not assumed, by cross-referencing three independent sources for this exact plate: the raw `Images/Index.idx.xml` acquisition metadata, the CPJUMP1 batch's own published README, and this plate's `load_data.csv` (Broad's CellProfiler input file, which maps each stain directly to a `chN` filename). All three agree:
+
+| Channel | Stain | Fluorophore | Ex/Em (nm) |
+|---|---|---|---|
+| ch1 | Mito | Alexa 647 | 640 / 706 |
+| ch2 | AGP | Alexa 568 | 561 / 599 |
+| ch3 | RNA | 488 long | 488 / 599 |
+| ch4 | ER | Alexa 488 | 488 / 522 |
+| ch5 | DNA | Hoechst 33342 | 405 / 456 |
+| ch6 | HighZBF (brightfield) | — | 740 / — |
+| ch7 | LowZBF (brightfield) | — | 740 / — |
+| ch8 | Brightfield | — | 740 / — |
+
+Recorded in [`configs/data.yaml`](configs/data.yaml) (`channels:` / `model_input_channels:`). Model input will be ch1–ch5, the 5 fluorescent Cell Painting stains; ch6–ch8 are brightfield/z-stack channels outside the standard assay and are excluded.
 
 **Compute target**: Colab Pro / notebook execution, not local GPU. Data volume and training scripts for this module are sized to fit a single Colab session (see `docs/build-log.md`).
 
 ## Model architecture
 
-Planned: a CNN trained on Cell Painting composite images to classify compound mechanism-of-action (MoA), most likely on the 5 fluorescent stain channels (DNA/ER/RNA/AGP/Mito) of this plate's 8 acquired channels, once `Index.idx.xml` confirms which channel indices those are — the 3 remaining channels (brightfield/autofocus) are not part of the standard Cell Painting assay and are not expected to be model input. Architecture choice (custom small CNN vs. a pretrained backbone fine-tuned on multi-channel input) is not yet finalized and will be recorded in `docs/build-log.md` when decided, not silently assumed here.
+Planned: a CNN trained on 5-channel Cell Painting composite images (ch1–ch5: Mito/AGP/RNA/ER/DNA, per the confirmed channel mapping above) to classify compound mechanism-of-action (MoA). Architecture choice (custom small CNN vs. a pretrained backbone fine-tuned on 5-channel input) is not yet finalized and will be recorded in `docs/build-log.md` when decided, not silently assumed here.
 
 ## Evaluation plan
 

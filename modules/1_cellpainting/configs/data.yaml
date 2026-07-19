@@ -25,15 +25,37 @@ source:
   cell_line: A549 (parental)
 
 # Per well: 9 sites (f01-f09), 1 focal plane (p01), 8 channels (ch1-ch8).
-# This plate's channel count (8, not the "standard" 5-channel Cell Painting
-# stain set) reflects this batch's WGA-stain variant -- see the CPJUMP1
-# experiment metadata. The ch1-ch8 -> stain-name mapping is NOT assumed here;
-# it must be read from this plate's own Images/Index.idx.xml before feature
-# extraction, since channel order is an acquisition detail, not a fixed
-# convention across plates.
 sites_per_well: 9
 planes_per_site: 1
 channels_per_site: 8
+
+# Channel-index -> stain mapping, confirmed (not assumed) by cross-referencing
+# three independent sources for this exact plate on 2026-07-20:
+#   1. This plate's own Images/Index.idx.xml (raw Harmony/Phenix acquisition
+#      metadata): ChannelID -> ChannelName + excitation/emission wavelength,
+#      identical across every well/site/plane on the plate.
+#   2. jump-cellpainting/2021_Chandrasekaran_submitted's README, which lists
+#      this same batch's ch01-ch08 fluorophore names independently of the XML.
+#   3. This plate's own workspace/load_data_csv/.../load_data.csv (Broad's
+#      CellProfiler input file for this plate), whose URL_Orig<Stain> columns
+#      point directly at specific chN filenames -- the ground truth actually
+#      used to generate Broad's published CellProfiler profiles.
+# All three agree. ch1-ch5 are the standard 5-channel Cell Painting stain set
+# (Mito/AGP/RNA/ER/DNA); ch6-ch8 are non-fluorescent brightfield/z-stack
+# channels specific to this batch, not part of the standard assay.
+channels:
+  ch1: {stain: Mito, fluorophore: "Alexa 647", excitation_nm: 640, emission_nm: 706}
+  ch2: {stain: AGP, fluorophore: "Alexa 568", excitation_nm: 561, emission_nm: 599}
+  ch3: {stain: RNA, fluorophore: "488 long", excitation_nm: 488, emission_nm: 599}
+  ch4: {stain: ER, fluorophore: "Alexa 488", excitation_nm: 488, emission_nm: 522}
+  ch5: {stain: DNA, fluorophore: "HOECHST 33342", excitation_nm: 405, emission_nm: 456}
+  ch6: {stain: HighZBF, fluorophore: "Brightfield H", excitation_nm: 740, emission_nm: null}
+  ch7: {stain: LowZBF, fluorophore: "Brightfield L", excitation_nm: 740, emission_nm: null}
+  ch8: {stain: Brightfield, fluorophore: "Brightfield", excitation_nm: 740, emission_nm: null}
+# Model input channels: ch1-ch5 (the 5 fluorescent Cell Painting stains).
+# ch6-ch8 are brightfield/z-stack channels, not part of the standard assay,
+# and are excluded from model input.
+model_input_channels: [ch1, ch2, ch3, ch4, ch5]
 
 compounds:
   # well, broad_sample (Broad compound ID), pert_iname (compound name), and
