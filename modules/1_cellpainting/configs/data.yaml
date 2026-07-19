@@ -1,22 +1,103 @@
-# Validation-pass data subset for Module 1.
+# Module 1 validation-pass data subset.
 #
-# Deliberately small: one plate, 10-15 compounds, to prove out the
-# download -> CellProfiler-feature -> model pipeline before scaling up.
-# See docs/build-log.md for the reasoning and DATA_SOURCES.md for provenance.
+# One plate, 14 compounds (within the agreed 10-15 range), chosen to prove
+# out the download -> CellProfiler-feature -> model pipeline before scaling
+# up. See docs/build-log.md for why this plate/platemap was picked and
+# DATA_SOURCES.md for dataset-level provenance.
+#
+# All fields below were verified directly against the live, public,
+# no-sign-request S3 bucket on 2026-07-20 (object listing + sizes), not
+# assumed from documentation alone.
 
 source:
   bucket: cellpainting-gallery
-  # Exact batch/plate not yet chosen. Fill in once selected, and mirror the
-  # same values into modules/1_cellpainting/README.md and DATA_SOURCES.md.
-  batch: null
-  plate: null
+  dataset: cpg0000-jump-pilot
+  source_name: source_4
+  batch: 2020_11_04_CPJUMP1
+  plate: BR00116991
+  measurement: "2020-11-05T19_51_35-Measurement1"
+  # JUMP-Target-1_compound_platemap (compound-perturbation plate, A549 cells,
+  # parental cell line, 24h timepoint). Three replicate plates of this same
+  # platemap also exist in this batch (BR00116992-BR00116994) if more
+  # in-batch replicates are ever needed; the cross-batch transfer plate will
+  # come from a different batch entirely, not one of these replicates.
+  platemap: JUMP-Target-1_compound_platemap
+  cell_line: A549 (parental)
+
+# Per well: 9 sites (f01-f09), 1 focal plane (p01), 8 channels (ch1-ch8).
+# This plate's channel count (8, not the "standard" 5-channel Cell Painting
+# stain set) reflects this batch's WGA-stain variant -- see the CPJUMP1
+# experiment metadata. The ch1-ch8 -> stain-name mapping is NOT assumed here;
+# it must be read from this plate's own Images/Index.idx.xml before feature
+# extraction, since channel order is an acquisition detail, not a fixed
+# convention across plates.
+sites_per_well: 9
+planes_per_site: 1
+channels_per_site: 8
 
 compounds:
-  # 10-15 compound IDs for the validation subset. Populate once chosen.
-  n_target_min: 10
-  n_target_max: 15
-  ids: []
+  # well, broad_sample (Broad compound ID), pert_iname (compound name), and
+  # targets (pipe-joined gene symbols) are copied verbatim from
+  # JUMP-Target-1_compound_platemap.tsv / JUMP-Target-1_compound_metadata.tsv
+  # (https://github.com/jump-cellpainting/JUMP-Target), cross-referenced
+  # against this specific plate's platemap above.
+  - well: A01
+    broad_sample: BRD-A86665761-001-01-1
+    pert_iname: gabapentin-enacarbil
+    targets: CACNA1A|CACNA1B|CACNA1C|CACNA1D|CACNA1E|CACNA1F|CACNA1G|CACNA1H|CACNA1I|CACNA1S|CACNA2D1|CACNA2D2|CACNA2D3|CACNA2D4|CACNB1|CACNB2|CACNB3|CACNB4|CACNG1|CACNG2|CACNG3|CACNG4|CACNG5|CACNG6|CACNG7|CACNG8
+  - well: A03
+    broad_sample: BRD-A22032524-074-09-9
+    pert_iname: amlodipine
+    targets: CA1|CACNA1B|CACNA1C|CACNA1D|CACNA1F|CACNA1S|CACNA2D1|CACNA2D3|CACNB1|CACNB2|SMPD1
+  - well: A04
+    broad_sample: BRD-A01078468-001-14-8
+    pert_iname: hexestrol
+    targets: AKR1C1|ESR1|ESR2
+  - well: A05
+    broad_sample: BRD-K48278478-001-01-2
+    pert_iname: quinine
+    targets: GP9|KCNB2|KCNN4|SLC29A4
+  - well: A06
+    broad_sample: BRD-K36574127-001-01-3
+    pert_iname: LOXO-101
+    targets: NTRK1|NTRK2|NTRK3
+  - well: A07
+    broad_sample: BRD-K74913225-001-14-0
+    pert_iname: brinzolamide
+    targets: CA1|CA12|CA14|CA2|CA4|CA5A|CA7
+  - well: A08
+    broad_sample: BRD-K94342292-001-01-3
+    pert_iname: NS-11021
+    targets: KCNMA1
+  - well: A10
+    broad_sample: BRD-K19975102-001-01-2
+    pert_iname: GNF-5837
+    targets: NTRK1|NTRK2|NTRK3
+  - well: A11
+    broad_sample: BRD-K25244359-066-02-6
+    pert_iname: apatinib
+    targets: CSK|KDR|KIT|RET
+  - well: A12
+    broad_sample: BRD-K18131774-001-18-4
+    pert_iname: ethoxzolamide
+    targets: CA1|CA12|CA13|CA14|CA2|CA3|CA4|CA5A|CA5B|CA6|CA7|CA9
+  - well: A13
+    broad_sample: BRD-A85242401-001-11-5
+    pert_iname: ascorbic-acid
+    targets: ALKBH2|ALKBH3|BBOX1|DBH|EGLN1|EGLN2|EGLN3|KDM5D|LCT|OGFOD1|OGFOD2|P3H1|P3H2|P3H3|P4HA1|P4HTM|PAM|PHYH|PLOD1|PLOD2|PLOD3|SLC23A1|SLC23A2|TMLHE
+  - well: A14
+    broad_sample: BRD-K06426971-001-02-7
+    pert_iname: ryuvidine
+    targets: CDK2|CDK4
+  - well: A15
+    broad_sample: BRD-K47049295-300-03-1
+    pert_iname: BAN-ORL-24
+    targets: OPRL1
+  - well: A16
+    broad_sample: BRD-K78122587-300-04-3
+    pert_iname: NNC-55-0396
+    targets: CATSPER1|CATSPER2|CATSPER3|CATSPER4
 
 output:
   raw_dir: data/raw/cellpainting
-  profiles_dir: data/processed/cellpainting
+  manifest_path: data/raw/cellpainting/manifest.json

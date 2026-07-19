@@ -105,7 +105,7 @@ files = ["common", "modules/1_cellpainting/src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "modules"]
-addopts = "--cov=common --cov-report=term-missing"
+addopts = "--cov=common --cov=cellpainting --cov-report=term-missing"
 markers = [
     "slow: exercises real data download/training, skipped by the weekly smoke test's fast subset",
 ]
