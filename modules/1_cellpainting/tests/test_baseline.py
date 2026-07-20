@@ -136,7 +136,25 @@ def test_assemble_dataset_rejects_wrong_well_count(tmp_path: Path):
     }
     s3 = FakeS3(objects)
 
-    with pytest.raises(ValueError, match="expected 2"):
+    with pytest.raises(ValueError, match="well mismatch"):
+        assemble_dataset(cfg, s3=s3)
+
+
+def test_assemble_dataset_rejects_wrong_well_identity_at_the_same_count(tmp_path: Path):
+    """A plate with the *right number* of rows but the *wrong well* for one
+    of them (e.g. a swapped/mislabeled compound) must be caught too -- not
+    just a plate that's missing wells outright. Flagged in code review as
+    something the original count-only check wouldn't catch."""
+    cfg = _sample_config(tmp_path, plates=["BR00116991"])
+    objects = {
+        # A99 instead of A03 -- same count (2) as cfg.wells, different well.
+        profile_key(cfg, "BR00116991"): _plate_csv(
+            [("A01", "BRD-1", 0.1, 0.2), ("A99", "BRD-3", 0.3, 0.4)]
+        ),
+    }
+    s3 = FakeS3(objects)
+
+    with pytest.raises(ValueError, match="well mismatch"):
         assemble_dataset(cfg, s3=s3)
 
 

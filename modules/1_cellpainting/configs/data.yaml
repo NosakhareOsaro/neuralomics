@@ -148,9 +148,17 @@ output:
 # for why this was chosen over running CellProfiler ourselves or writing a
 # custom substitute. Used only for the tabular baseline / UMAP-SHAP track,
 # not the CNN (which trains on raw images via download.py above).
+#
+# The S3 key itself is not stored here as a literal string: it's derived
+# programmatically from `source:` above (dataset/source_name/batch/plate)
+# plus the profile variant name, by cellpainting.profiles.profile_key() --
+# the one place that owns this path format, reused by both profiles.py (this
+# plate) and baseline.py (this plate's replicates). A second, independently
+# maintained literal copy of the key lived here previously; a code review
+# flagged that as a silent-drift risk (two disconnected sources of truth for
+# the same filename convention), so it was removed. See docs/build-log.md.
 profiles:
   bucket: cellpainting-gallery
-  key: cpg0000-jump-pilot/source_4/workspace/profiles/2020_11_04_CPJUMP1/BR00116991/BR00116991_normalized_feature_select_batch.csv.gz
   n_features: 838
   n_metadata_cols: 13
   n_rows: 384

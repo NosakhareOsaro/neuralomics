@@ -11,6 +11,7 @@ from cellpainting.profiles import (
     filter_profile_rows,
     filtered_profile_path,
     load_profiles_config,
+    profile_key,
     profile_manifest_path,
     read_filtered_csv,
     write_filtered_csv,
@@ -30,13 +31,27 @@ EXPECTED_METADATA_COLS = {
 def _sample_config(tmp_path: Path) -> ProfilesConfig:
     return ProfilesConfig(
         bucket="cellpainting-gallery",
-        key=(
-            "cpg0000-jump-pilot/source_4/workspace/profiles/2020_11_04_CPJUMP1/"
-            "BR00116991/BR00116991_normalized_feature_select_batch.csv.gz"
-        ),
+        dataset="cpg0000-jump-pilot",
+        source_name="source_4",
+        batch="2020_11_04_CPJUMP1",
+        plate="BR00116991",
         wells=["A01", "A03"],
         raw_dir=tmp_path / "raw",
     )
+
+
+def test_profile_key_matches_the_known_good_key_for_br00116991():
+    assert profile_key("cpg0000-jump-pilot", "source_4", "2020_11_04_CPJUMP1", "BR00116991") == (
+        "cpg0000-jump-pilot/source_4/workspace/profiles/2020_11_04_CPJUMP1/"
+        "BR00116991/BR00116991_normalized_feature_select_batch.csv.gz"
+    )
+
+
+def test_profiles_config_key_is_derived_not_stored(tmp_path: Path):
+    """`key` is a computed property, not a field -- there is exactly one
+    place (`profile_key()`) that knows this S3 path format."""
+    cfg = _sample_config(tmp_path)
+    assert cfg.key == profile_key(cfg.dataset, cfg.source_name, cfg.batch, cfg.plate)
 
 
 def test_filtered_profile_path_strips_csv_gz_suffix(tmp_path: Path):
@@ -49,6 +64,7 @@ def test_filtered_profile_path_strips_csv_gz_suffix(tmp_path: Path):
 def test_load_profiles_config_reads_the_real_module_config():
     cfg = load_profiles_config(DEFAULT_CONFIG_PATH)
     assert cfg.bucket == "cellpainting-gallery"
+    assert cfg.plate == "BR00116991"
     assert cfg.key.endswith("BR00116991_normalized_feature_select_batch.csv.gz")
     assert len(cfg.wells) == 14
     assert "A01" in cfg.wells
@@ -89,7 +105,15 @@ def test_fetch_and_filter_profile_dry_run_matches_live_bucket(tmp_path: Path):
     verified manually on 2026-07-20 (see docs/build-log.md).
     """
     cfg = load_profiles_config(DEFAULT_CONFIG_PATH)
-    cfg = ProfilesConfig(bucket=cfg.bucket, key=cfg.key, wells=cfg.wells, raw_dir=tmp_path / "raw")
+    cfg = ProfilesConfig(
+        bucket=cfg.bucket,
+        dataset=cfg.dataset,
+        source_name=cfg.source_name,
+        batch=cfg.batch,
+        plate=cfg.plate,
+        wells=cfg.wells,
+        raw_dir=tmp_path / "raw",
+    )
 
     manifest = fetch_and_filter_profile(cfg, dry_run=True)
 
@@ -111,7 +135,15 @@ def test_fetch_and_filter_profile_dry_run_has_expected_metadata_columns(tmp_path
 @pytest.mark.slow
 def test_fetch_and_filter_profile_writes_and_resumes_idempotently(tmp_path: Path):
     cfg = load_profiles_config(DEFAULT_CONFIG_PATH)
-    cfg = ProfilesConfig(bucket=cfg.bucket, key=cfg.key, wells=cfg.wells, raw_dir=tmp_path / "raw")
+    cfg = ProfilesConfig(
+        bucket=cfg.bucket,
+        dataset=cfg.dataset,
+        source_name=cfg.source_name,
+        batch=cfg.batch,
+        plate=cfg.plate,
+        wells=cfg.wells,
+        raw_dir=tmp_path / "raw",
+    )
 
     first = fetch_and_filter_profile(cfg, dry_run=False)
     dest = filtered_profile_path(cfg)

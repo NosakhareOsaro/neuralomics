@@ -22,21 +22,47 @@ import yaml
 
 from cellpainting.download import DEFAULT_CONFIG_PATH, make_s3_client, write_manifest
 
+# The pycytominer profile variant this project uses -- see the README's
+# Feature extraction section for why. This is the one place that knows the
+# S3 key format for a plate's profile; `profile_key()` below is reused by
+# both this module (BR00116991) and baseline.py (BR00116991's replicates),
+# rather than each independently hardcoding/reconstructing the path, which a
+# code review flagged as a silent-drift risk when the two definitions could
+# disagree unnoticed. See docs/build-log.md.
+PROFILE_VARIANT = "normalized_feature_select_batch"
+
+
+def profile_key(dataset: str, source_name: str, batch: str, plate: str) -> str:
+    return (
+        f"{dataset}/{source_name}/workspace/profiles/{batch}/"
+        f"{plate}/{plate}_{PROFILE_VARIANT}.csv.gz"
+    )
+
 
 @dataclass(frozen=True)
 class ProfilesConfig:
     bucket: str
-    key: str
+    dataset: str
+    source_name: str
+    batch: str
+    plate: str
     wells: list[str]
     raw_dir: Path
+
+    @property
+    def key(self) -> str:
+        return profile_key(self.dataset, self.source_name, self.batch, self.plate)
 
 
 def load_profiles_config(path: Path = DEFAULT_CONFIG_PATH) -> ProfilesConfig:
     raw = yaml.safe_load(path.read_text())
-    profiles = raw["profiles"]
+    src = raw["source"]
     return ProfilesConfig(
-        bucket=profiles["bucket"],
-        key=profiles["key"],
+        bucket=raw["profiles"]["bucket"],
+        dataset=src["dataset"],
+        source_name=src["source_name"],
+        batch=src["batch"],
+        plate=src["plate"],
         wells=[c["well"] for c in raw["compounds"]],
         raw_dir=Path(raw["output"]["raw_dir"]),
     )

@@ -33,9 +33,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from cellpainting.download import DEFAULT_CONFIG_PATH, make_s3_client
+from cellpainting.profiles import PROFILE_VARIANT
+from cellpainting.profiles import profile_key as _profile_key_for_plate
 from common.seeding import DEFAULT_SEED, set_global_seed
 
-PROFILE_VARIANT = "normalized_feature_select_batch"
 LABEL_FIELD = "Metadata_broad_sample"
 
 
@@ -66,10 +67,9 @@ def load_baseline_config(path: Path = DEFAULT_CONFIG_PATH) -> BaselineConfig:
 
 
 def profile_key(cfg: BaselineConfig, plate: str) -> str:
-    return (
-        f"{cfg.dataset}/{cfg.source_name}/workspace/profiles/{cfg.batch}/"
-        f"{plate}/{plate}_{PROFILE_VARIANT}.csv.gz"
-    )
+    """Thin adapter over `cellpainting.profiles.profile_key` -- see that
+    module for the one place that owns this S3 key format."""
+    return _profile_key_for_plate(cfg.dataset, cfg.source_name, cfg.batch, plate)
 
 
 def filtered_plate_path(cfg: BaselineConfig, plate: str) -> Path:
@@ -123,6 +123,7 @@ def assemble_dataset(
     header_ref: list[str] | None = None
     feature_idx: list[int] = []
     label_idx = -1
+    well_idx = -1
     X_rows: list[list[float]] = []
     y: list[str] = []
     groups: list[str] = []
@@ -133,14 +134,21 @@ def assemble_dataset(
             header_ref = header
             feature_idx = [i for i, c in enumerate(header) if not c.startswith("Metadata_")]
             label_idx = header.index(LABEL_FIELD)
+            well_idx = header.index("Metadata_Well")
         elif header != header_ref:
             raise ValueError(
                 f"plate {plate}'s profile schema doesn't match {cfg.plates[0]}'s -- "
                 "refusing to silently pool mismatched feature columns"
             )
-        if len(rows) != len(cfg.wells):
+        # Compares well *identity*, not just count: a plate with the right
+        # number of rows but a swapped/wrong compound at one well (same
+        # count, different content) must be rejected too, not just a plate
+        # missing wells outright.
+        plate_wells = [row[well_idx] for row in rows]
+        if sorted(plate_wells) != sorted(cfg.wells):
             raise ValueError(
-                f"plate {plate}: expected {len(cfg.wells)} of our wells, got {len(rows)}"
+                f"plate {plate}: well mismatch -- expected {sorted(cfg.wells)}, "
+                f"got {sorted(plate_wells)}"
             )
         for row in rows:
             X_rows.append([float(row[i]) for i in feature_idx])
