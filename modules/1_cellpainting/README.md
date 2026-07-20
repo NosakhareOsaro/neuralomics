@@ -86,6 +86,14 @@ A CNN trained directly on raw 5-channel Cell Painting pixel composites (ch1–ch
 
 **Architecture: a pretrained ImageNet backbone (EfficientNet-B0 primary, ResNet50 fallback) fine-tuned, not a custom CNN trained from scratch.** Decided in `docs/build-log.md` before any CNN code was written. With the training set scoped to the same 14 compounds and same 4 already-verified plates as the tabular baseline (`BR00116991`–`BR00116994`), the CNN trains at image level — up to ~504 five-channel site composites (9 sites × 14 wells × 4 plates), not all 384 wells on the plate — still a small dataset by CNN standards, which is why a pretrained backbone's more sample-efficient features were chosen over training a randomly-initialized network from scratch. The pretrained 3-channel stem is expanded to a 5-channel first conv layer (warm-started by copying the pretrained RGB kernel weights and filling the 2 new channels with their mean, not random init) so the network sees all 5 stains jointly from the first layer, rather than DeepProfiler's alternative per-channel-replicate-and-concatenate approach (considered, rejected as the primary plan — see build log for why). This is a within-batch setup, not a substitute for the cross-batch transfer evaluation below, which still needs a genuinely different batch.
 
+Implemented in `src/cellpainting/cnn.py` (config-driven, same conventions as `download.py`/`profiles.py`/`baseline.py`), including illumination correction, per-channel min-max normalization, geometry-only augmentation, early stopping, and the binomial significance check — all decided in `docs/build-log.md` before this code was written. **Not run for real yet**: images for `BR00116992`–`BR00116994` aren't downloaded, and per this project's Colab Pro compute-target decision, real training happens there, not in local dev. Fully covered by fast unit tests against synthetic data instead (`test_cnn.py`).
+
+```bash
+python -m cellpainting.cnn                   # checks config/images, trains all 4 folds, writes results.json
+python -m cellpainting.cnn --fetch-images     # also fetches any missing plates' images first (~2.4GB/plate, explicit opt-in)
+python -m cellpainting.cnn --backbone resnet50 --device cuda
+```
+
 ## Evaluation plan
 
 Per the project-wide evaluation philosophy ([`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)), this module reports two numbers:
