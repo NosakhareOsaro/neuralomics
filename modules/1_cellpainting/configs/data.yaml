@@ -35,8 +35,24 @@ source:
 # tabular baseline, enabling real leave-one-plate-out cross-validation
 # instead of evaluating on 14 points with no held-out structure. This is a
 # within-batch robustness check for the baseline, not a substitute for the
-# CNN's cross-batch transfer evaluation.
+# CNN's cross-batch transfer evaluation. The CNN (cnn.py) also trains across
+# all four of these plates -- see its own train/validation split in
+# docs/build-log.md.
 replicate_plates: [BR00116992, BR00116993, BR00116994]
+
+# Per-plate measurement (acquisition run) timestamps, needed to build each
+# plate's image S3 prefix ("{plate}__{measurement}/Images/"). Each plate was
+# acquired as a separate Harmony/Phenix run with its own timestamp -- checked
+# directly against the live bucket's images/ listing on 2026-07-20, not
+# assumed to share BR00116991's `source.measurement` above (they don't).
+# Used by cnn.py to fetch/locate raw images for the replicate plates;
+# download.py's original single-plate `source.measurement` field is
+# untouched and still used only for BR00116991's own download.
+measurements:
+  BR00116991: "2020-11-05T19_51_35-Measurement1"
+  BR00116992: "2020-11-05T21_31_31-Measurement1"
+  BR00116993: "2020-11-05T23_11_39-Measurement1"
+  BR00116994: "2020-11-06T00_59_44-Measurement1"
 
 # Per well: 9 sites (f01-f09), 1 focal plane (p01), 8 channels (ch1-ch8).
 sites_per_well: 9
