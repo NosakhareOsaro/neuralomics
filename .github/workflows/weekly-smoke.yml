@@ -2,9 +2,11 @@ name: Weekly smoke test
 
 # Cheap end-to-end sanity check, independent of the push-triggered CI job.
 # Intent: catch silent breakage from upstream dependency releases even on
-# weeks with no commits. Currently runs the same fast unit-test suite as CI;
-# will be extended to run a tiny real pipeline (e.g. Module 1 on its fixture
-# subset) once one exists, so "smoke test" actually exercises data -> model.
+# weeks with no commits. Runs the same fast unit-test suite as CI, plus the
+# `slow` tests (currently: a live, no-sign-request S3 listing against the
+# Module 1 JUMP-CP plate) that push CI deliberately skips, so this is the one
+# place that would actually notice if the Cell Painting Gallery bucket
+# layout or this module's plate/well selection stopped matching reality.
 on:
   schedule:
     - cron: "0 6 * * 1" # 06:00 UTC every Monday
@@ -23,7 +25,10 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,cellpainting]"
 
       - name: Run fast test suite
         run: pytest -m "not slow"
+
+      - name: Run slow tests (live data-source checks)
+        run: pytest -m slow

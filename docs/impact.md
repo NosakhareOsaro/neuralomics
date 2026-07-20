@@ -6,7 +6,7 @@ Concrete, verifiable technical claims from this project, intended as material a 
 
 Status: in progress. No results yet.
 
-Planned claim shape (to be replaced with real numbers once the batch-transfer experiment runs): in-distribution MoA classification accuracy/macro-F1 vs. cross-batch transfer accuracy/macro-F1, and the point-drop between them, compared against a naive (e.g. majority-class or non-deep tabular) baseline.
+Planned claim shape (to be replaced with real numbers once the batch-transfer experiment runs): in-distribution compound-identity classification accuracy/macro-F1 (14-way — no MoA annotation exists for this pilot's compound set, see `docs/build-log.md`) vs. cross-batch transfer accuracy/macro-F1, and the point-drop between them, compared against a naive (e.g. majority-class or non-deep tabular) baseline, with the baseline's own significance assessed via a permutation-based null rather than a fixed accuracy threshold.
 
 ## Module 2 — GNN for scRNA-seq cell-type classification
 
