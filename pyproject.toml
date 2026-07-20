@@ -33,6 +33,7 @@ cellpainting = [
     "torch>=2.2",
     "torchvision>=0.17",
     "scikit-learn>=1.4",
+    "scipy>=1.12",
     "umap-learn>=0.5",
     "shap>=0.45",
     "xgboost>=2.0",
