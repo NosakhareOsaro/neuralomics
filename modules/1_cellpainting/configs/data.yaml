@@ -17,12 +17,26 @@ source:
   plate: BR00116991
   measurement: "2020-11-05T19_51_35-Measurement1"
   # JUMP-Target-1_compound_platemap (compound-perturbation plate, A549 cells,
-  # parental cell line, 24h timepoint). Three replicate plates of this same
-  # platemap also exist in this batch (BR00116992-BR00116994) if more
-  # in-batch replicates are ever needed; the cross-batch transfer plate will
-  # come from a different batch entirely, not one of these replicates.
+  # parental cell line, 24h timepoint). The cross-batch transfer plate (for
+  # the CNN's evaluation plan) will come from a different batch entirely, not
+  # one of the replicate plates below.
   platemap: JUMP-Target-1_compound_platemap
   cell_line: A549 (parental)
+
+# Replicate plates: three more plates in this same batch use this same
+# platemap. Confirmed usable, not assumed -- fetched each plate's
+# _normalized_feature_select_batch.csv.gz directly from the live bucket on
+# 2026-07-20 and diffed Metadata_Well -> (Metadata_broad_sample,
+# Metadata_pert_iname) for our 14 wells against BR00116991: exact match, 0
+# mismatches, across all three. (Incidental: BR00116993 has 383/384 total
+# wells on the plate -- well N01 is missing -- but N01 isn't one of our 14
+# compounds, so it doesn't affect this subset.) See docs/build-log.md.
+# Together with BR00116991 this gives n=56 (14 compounds x 4 plates) for the
+# tabular baseline, enabling real leave-one-plate-out cross-validation
+# instead of evaluating on 14 points with no held-out structure. This is a
+# within-batch robustness check for the baseline, not a substitute for the
+# CNN's cross-batch transfer evaluation.
+replicate_plates: [BR00116992, BR00116993, BR00116994]
 
 # Per well: 9 sites (f01-f09), 1 focal plane (p01), 8 channels (ch1-ch8).
 sites_per_well: 9
