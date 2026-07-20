@@ -93,6 +93,18 @@ Per the project-wide evaluation philosophy ([`../../ARCHITECTURE.md`](../../ARCH
 
 The gap between the two, compared against a naive baseline (majority-class or non-deep tabular classifier on Broad's precomputed CellProfiler features — see Feature extraction above), is the headline result — see [`../../docs/impact.md`](../../docs/impact.md).
 
+**Tabular baseline's own robustness check**: `BR00116992`–`BR00116994` are three more plates in this same batch using the same platemap, confirmed (not assumed) to have identical well→compound assignment to `BR00116991` for our 14 wells — see `docs/build-log.md`. This gives the tabular baseline n=56 (14 compounds × 4 plates) instead of n=14, enabling real leave-one-plate-out cross-validation (train on 3 plates, test on the held-out 4th) rather than an unheld-out 14-point evaluation. This is a within-batch check on the baseline itself, separate from the CNN's cross-batch transfer evaluation above. Significance is assessed with a permutation-based null (label-shuffling), not a fixed accuracy threshold, since chance-level accuracy for 14-way classification isn't simply 1/14 once class-conditional feature structure and CV-fold correlation are accounted for.
+
+Run the baseline (fetches/caches all four plates' profiles, runs leave-one-plate-out CV, then the permutation null test):
+
+```bash
+python -m cellpainting.baseline                        # 1000 permutations by default
+python -m cellpainting.baseline --n-permutations 200    # fewer permutations, faster
+python -m cellpainting.baseline --refresh               # re-fetch profiles from S3 instead of using the local cache
+```
+
+Writes results to `data/raw/cellpainting/baseline/results.json`.
+
 ## Results
 
 None yet. This section is filled in only once a real experiment run is logged in MLflow, per [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
