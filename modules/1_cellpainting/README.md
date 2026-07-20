@@ -4,7 +4,9 @@ Status: in progress (scaffold). No trained model or results yet.
 
 ## Research question
 
-Within the project's overall thesis, this module asks: how well does a CNN trained to classify mechanism-of-action (MoA) from Cell Painting images generalize to an imaging batch it never saw during training?
+Within the project's overall thesis, this module asks: how well does a CNN trained to classify *compound identity* from Cell Painting images generalize to an imaging batch it never saw during training?
+
+**Classification target: compound identity, not mechanism-of-action (MoA).** An earlier version of this module framed the task as MoA classification. That was never a well-defined task for this subset: `JUMP-Target-1_compound_metadata.tsv` (the source of the compound metadata below) has no MoA field, only per-compound gene-target lists — and grouping 14 compounds into MoA classes from those raw target lists would mean inventing ground truth, not using it. The task is instead a 14-way classification over compound identity (`Metadata_broad_sample` / `Metadata_pert_iname`), which uses labels that already exist and are verified below. See `docs/build-log.md` for the full reasoning. This applies to both the CNN (this section) and the tabular baseline (see Feature extraction / Evaluation plan below).
 
 ## Data source
 
@@ -80,14 +82,14 @@ python -m cellpainting.profiles --dry-run   # fetches + filters in memory, print
 
 ## Model architecture
 
-Planned: a CNN trained directly on raw 5-channel Cell Painting pixel composites (ch1–ch5: Mito/AGP/RNA/ER/DNA, per the confirmed channel mapping above) to classify compound mechanism-of-action (MoA) — not on CellProfiler features. The CNN never runs CellProfiler or consumes its output; Broad's precomputed profiles (see Feature extraction above) feed only the naive/tabular baseline and the UMAP/SHAP exploratory analysis this module is compared against. Architecture choice (custom small CNN vs. a pretrained backbone fine-tuned on 5-channel input) is not yet finalized and will be recorded in `docs/build-log.md` when decided, not silently assumed here.
+Planned: a CNN trained directly on raw 5-channel Cell Painting pixel composites (ch1–ch5: Mito/AGP/RNA/ER/DNA, per the confirmed channel mapping above) to classify compound identity (14-way, not mechanism-of-action — see Research question above) — not on CellProfiler features. The CNN never runs CellProfiler or consumes its output; Broad's precomputed profiles (see Feature extraction above) feed only the naive/tabular baseline and the UMAP/SHAP exploratory analysis this module is compared against. Architecture choice (custom small CNN vs. a pretrained backbone fine-tuned on 5-channel input) is not yet finalized and will be recorded in `docs/build-log.md` when decided, not silently assumed here.
 
 ## Evaluation plan
 
 Per the project-wide evaluation philosophy ([`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)), this module reports two numbers:
 
-1. **In-distribution**: MoA classification accuracy / macro-F1 on a held-out split from the same imaging batch as training.
-2. **Transfer**: MoA classification accuracy / macro-F1 on a different imaging batch than any training example (cross-batch transfer).
+1. **In-distribution**: compound-identity classification accuracy / macro-F1 (14-way) on a held-out split from the same imaging batch as training.
+2. **Transfer**: compound-identity classification accuracy / macro-F1 (14-way) on a different imaging batch than any training example (cross-batch transfer).
 
 The gap between the two, compared against a naive baseline (majority-class or non-deep tabular classifier on Broad's precomputed CellProfiler features — see Feature extraction above), is the headline result — see [`../../docs/impact.md`](../../docs/impact.md).
 
