@@ -3,10 +3,12 @@ message: "If you use this software, please cite it using the metadata below."
 title: "NeuralOmics: A representation-learning transfer study across genomics and cell biology"
 authors:
   - family-names: Osaro
-    given-names: Nosakhare
+    given-names: Nosakhare Odionfo
+    email: osaronosakhare@gmail.com
+    orcid: "https://orcid.org/0009-0004-9778-1161"
 version: 0.1.0-dev
 date-released: "2026-07-05"
-repository-code: "TODO: add once a GitHub remote is created"
+repository-code: "https://github.com/NosakhareOsaro/neuralomics"
 license: Apache-2.0
 type: software
 keywords:
