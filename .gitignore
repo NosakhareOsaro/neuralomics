@@ -49,5 +49,3 @@ models/checkpoints/
 # Docs build output
 docs/site/
 
-# Claude Code project metadata (local tooling only, not part of the codebase)
-.claude/
